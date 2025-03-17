@@ -1,4 +1,4 @@
-import type { IArticle } from "../../../global.types";
+import { IArticle } from "@/global.types";
 
 interface ArticleCardProps {
   article: IArticle;

@@ -1,7 +1,7 @@
 import { IArticle } from "@/global.types";
-import { fetchGuardianArticles } from "@/services/guardian-api.service";
-import { fetchNewsApiArticles } from "@/services/news-api.service";
-import { fetchNYTArticles } from "@/services/nyt-api.service";
+import { fetchGuardianArticles } from "../services/guardian-api.service";
+import { fetchNewsApiArticles } from "../services/news-api.service";
+import { fetchNYTArticles } from "../services/nyt-api.service";
 import { useState, useEffect, useCallback } from "react";
 
 type NewsSource = "newsapi" | "guardian" | "nyt" | "all";

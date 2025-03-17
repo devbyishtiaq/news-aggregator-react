@@ -1,7 +1,7 @@
 import React, { useRef, useCallback } from "react";
 import { ErrorMessage, Spinner } from "../common";
 import ArticleCard from "./article-card";
-import { useArticles } from "@/api/useArticles";
+import { useArticles } from "../../api/useArticles";
 
 interface NewsFeedProps {
   source?: "newsapi" | "guardian" | "nyt" | "all";

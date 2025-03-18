@@ -49,13 +49,21 @@ export const useArticles = ({
         }
 
         if (source === "guardian" || source === "all") {
-          const result = await fetchGuardianArticles(currentPage, pageSize);
+          const result = await fetchGuardianArticles(
+            currentPage,
+            pageSize,
+            category
+          );
           newArticles = [...newArticles, ...result.articles];
           moreArticles = result.hasMore || moreArticles;
         }
 
         if (source === "nyt" || source === "all") {
-          const result = await fetchNYTArticles();
+          const result = await fetchNYTArticles(
+            currentPage,
+            pageSize,
+            category
+          );
           newArticles = [...newArticles, ...result.articles];
           moreArticles = result.hasMore || moreArticles;
         }

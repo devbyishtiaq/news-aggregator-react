@@ -1,7 +1,22 @@
 import { IArticle, IFetchArticlesResponse } from "@/global.types";
+import axiosInstance from "../utils/axios";
+import { API_CONFIG } from "../utils/constants";
 
-const API_KEY = import.meta.env.VITE_NEWS_API_KEY || "";
-const BASE_URL = "https://newsapi.org/v2";
+export interface INewsAPIResponse {
+  articles: INewsAPIArticle[];
+  totalResults: number;
+}
+
+export interface INewsAPIArticle {
+  source: { id: string | null; name: string };
+  author: string | null;
+  title: string;
+  description: string | null;
+  url: string;
+  urlToImage: string | null;
+  publishedAt: string;
+  content: string | null;
+}
 
 export const fetchNewsApiArticles = async (
   page = 1,
@@ -9,29 +24,24 @@ export const fetchNewsApiArticles = async (
   category = "general",
   search = ""
 ): Promise<IFetchArticlesResponse> => {
+  const { BASE_URL, API_KEY } = API_CONFIG.NEWS_API;
+  const url = `${BASE_URL}/top-headlines?country=us&q=${search}&category=${category}&page=${page}&pageSize=${pageSize}&apiKey=${API_KEY}`;
+
   try {
-    const response = await fetch(
-      `${BASE_URL}/top-headlines?country=us&search=${search}category=${category}&page=${page}&pageSize=${pageSize}&apiKey=${API_KEY}`
-    );
+    const { data } = await axiosInstance.get<INewsAPIResponse>(url);
 
-    if (!response.ok) {
-      throw new Error(`NewsAPI error: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    const articles: IArticle[] = data?.articles?.map((article: any) => ({
-      id: `newsapi-${article?.source.id || article?.source?.name}-${Date.parse(
-        article?.publishedAt
+    const articles: IArticle[] = data.articles.map((article) => ({
+      id: `newsapi-${article.source.id || article.source.name}-${Date.parse(
+        article.publishedAt
       )}`,
-      source: "NewsAPI",
-      title: article?.title,
-      description: article?.description || "",
-      url: article?.url,
-      urlToImage: article?.urlToImage || "",
-      publishedAt: article?.publishedAt,
-      content: article?.content,
-      author: article?.author || "Unknown",
+      source: "News Api",
+      title: article.title,
+      description: article.description || "",
+      url: article.url,
+      urlToImage: article.urlToImage || "",
+      publishedAt: article.publishedAt,
+      content: article.content || "",
+      author: article.author || "Unknown",
     }));
 
     return {

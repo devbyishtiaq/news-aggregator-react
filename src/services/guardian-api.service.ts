@@ -1,4 +1,5 @@
-import { IArticle, IFetchArticlesResponse } from "@/global.types";
+import { EDateFormat, formatDate } from "../helpers/date-formatter";
+import { IArticle, IFetchArticlesResponse } from "../global.types";
 import axiosInstance from "../utils/axios";
 import { API_CONFIG } from "../utils/constants";
 
@@ -21,13 +22,33 @@ export interface IGuardianArticle {
   };
 }
 
+/**
+ * fetchGuardianArticles function fetches articles from the Guardian API.
+ *
+ * It supports pagination, category filtering, search, and date filtering.
+ *
+ * @param page - The page number for pagination.
+ * @param pageSize - The number of articles to fetch per page.
+ * @param category - The category of articles to filter by.
+ * @param search - The search term to filter articles by.
+ * @param date - The date to filter articles by.
+ * @returns A Promise that resolves to an IFetchArticlesResponse object.
+ */
+
 export const fetchGuardianArticles = async (
   page = 1,
   pageSize = 10,
-  search = ""
+  category = "",
+  search = "",
+  date = ""
 ): Promise<IFetchArticlesResponse> => {
   const { BASE_URL, API_KEY } = API_CONFIG.GUARDIAN;
-  const url = `${BASE_URL}search?section=news&q=${search}&page=${page}&page-size=${pageSize}&show-elements=image&show-fields=all&api-key=${API_KEY}`;
+  let url = `${BASE_URL}search?section=news&q=${search}&tag=${category}&page=${page}&page-size=${pageSize}&show-elements=image&show-fields=all&api-key=${API_KEY}`;
+
+  if (date) {
+    const formattedDate = formatDate(date, EDateFormat.ISO);
+    url += `&from-date=${formattedDate}`;
+  }
 
   try {
     const { data } = await axiosInstance.get<IGuardianAPIResponse>(url);
@@ -54,3 +75,14 @@ export const fetchGuardianArticles = async (
     return { articles: [], hasMore: false };
   }
 };
+
+/**
+ * Usage example:
+ *
+ * import { fetchGuardianArticles } from './guardian-api.service';
+ *
+ * async function getArticles() {
+ * const response = await fetchGuardianArticles(1, 10, 'world', 'example', '2023-10-26');
+ * console.log(response.articles);
+ * }
+ */

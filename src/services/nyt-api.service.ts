@@ -1,6 +1,7 @@
-import { IArticle, IFetchArticlesResponse } from "@/global.types";
-import axiosInstance from "../utils/axios";
+import { IArticle, IFetchArticlesResponse } from "../global.types";
 import { API_CONFIG } from "../utils/constants";
+import axiosInstance from "../utils/axios";
+import { EDateFormat, formatDate } from "../helpers/date-formatter";
 
 export interface INYTAPIResponse {
   response: { docs: INYTArticle[] };
@@ -14,43 +15,63 @@ export interface INYTArticle {
   pub_date: string;
   byline: { original: string };
   multimedia: { url: string }[];
+  headline: { main: string };
 }
+
+/**
+ * fetchNYTArticles function fetches articles from the New York Times API.
+ *
+ * It supports pagination, category filtering, search, and date filtering.
+ *
+ * @param page - The page number for pagination.
+ * @param pageSize - The number of articles to fetch per page.
+ * @param category - The category of articles to filter by.
+ * @param search - The search term to filter articles by.
+ * @param date - The date to filter articles by.
+ * @returns A Promise that resolves to an IFetchArticlesResponse object.
+ */
 
 export const fetchNYTArticles = async (
   page = 1,
   pageSize = 10,
-  search = ""
+  category = "",
+  search = "",
+  date = ""
 ): Promise<IFetchArticlesResponse> => {
   const { BASE_URL, API_KEY } = API_CONFIG.NYT;
-  const url = `${BASE_URL}/search/v2/articlesearch.json?q=${search}&page=${page}&pageSize=${pageSize}&sort=oldest&api-key=${API_KEY}`;
+
+  const fq = category ? `&fq=news_desk:("${category}")` : "";
+
+  let url = `${BASE_URL}/search/v2/articlesearch.json?q=${search}${fq}&page=${
+    page - 1
+  }&sort=oldest&fl=web_url,snippet,abstract,pub_date,byline,headline,multimedia,uri&api-key=${API_KEY}`;
+
+  if (date) {
+    const formattedDate = formatDate(date, EDateFormat.YYYYMMDD);
+    url += `&begin_date=${formattedDate}`;
+  }
 
   try {
     const { data } = await axiosInstance.get<INYTAPIResponse>(url);
 
-    const startIndex = page * 10;
-    const results: INYTArticle[] = data.response.docs.slice(
-      startIndex,
-      startIndex + 10
-    );
-
-    const articles: IArticle[] = results.map((article) => ({
-      id: `nyt-${article.uri.split("/").pop()}`,
+    const articles: IArticle[] = data.response.docs.map((article) => ({
+      id: `nyt-${article.uri?.split("/")?.pop()}`,
       source: "New York Times",
-      title: article.snippet,
-      description: article.abstract,
+      title: article?.headline?.main || "No Title",
+      description: article.abstract || article.snippet || "No Description",
       url: article.web_url,
       urlToImage:
         article.multimedia.length > 0
           ? `https://www.nytimes.com/${article.multimedia[0].url}`
           : "",
       publishedAt: article.pub_date,
-      content: article.snippet,
-      author: article.byline?.original.replace("By ", "") || "Unknown",
+      content: article.snippet || "",
+      author: article.byline?.original?.replace("By ", "") || "Unknown",
     }));
 
     return {
       articles,
-      hasMore: startIndex + 10 < data.response.docs.length,
+      hasMore: data.response.docs.length === pageSize,
       nextPage: page + 1,
     };
   } catch (error) {
@@ -58,3 +79,14 @@ export const fetchNYTArticles = async (
     return { articles: [], hasMore: false };
   }
 };
+
+/**
+ * Usage example:
+ *
+ * import { fetchNYTArticles } from './nyt-api.service';
+ *
+ * async function getArticles() {
+ * const response = await fetchNYTArticles(1, 10, 'politics', 'example', '2023-10-26');
+ * console.log(response.articles);
+ * }
+ */

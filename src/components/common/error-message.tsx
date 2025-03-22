@@ -3,6 +3,17 @@ interface ErrorMessageProps {
   onRetry?: () => void;
 }
 
+/**
+ * ErrorMessage component displays an error message with an optional retry button.
+ *
+ * It provides a user-friendly way to show error messages and allows users to
+ * retry the failed operation if an `onRetry` function is provided.
+ *
+ * @param message - The error message to display.
+ * @param onRetry - An optional function to call when the retry button is clicked.
+ * @returns JSX.Element
+ */
+
 const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, onRetry }) => {
   return (
     <div
@@ -24,3 +35,21 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, onRetry }) => {
 };
 
 export default ErrorMessage;
+
+/**
+ * Usage example:
+ *
+ * import ErrorMessage from './ErrorMessage';
+ *
+ * function MyComponent() {
+ * const handleRetry = () => {
+ * console.log('Retrying...');
+ * };
+ *
+ * return (
+ * <div>
+ * <ErrorMessage message="Failed to fetch data." onRetry={handleRetry} />
+ * </div>
+ * );
+ * }
+ */

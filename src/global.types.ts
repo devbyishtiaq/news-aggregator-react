@@ -1,3 +1,5 @@
+export type NewsSource = "newsapi" | "guardian" | "nyt";
+
 export interface IArticle {
   id: string;
   source: string;

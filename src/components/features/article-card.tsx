@@ -6,6 +6,17 @@ interface ArticleCardProps {
 
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=No+Image";
 
+/**
+ * ArticleCard component displays a single article with its title, description,
+ * source, publication date, author, and a link to the full article.
+ *
+ * It handles cases where the article image is not available by displaying a
+ * placeholder image.
+ *
+ * @param article - An IArticle object containing the article's details.
+ * @returns JSX.Element
+ */
+
 const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
   const formattedDate = new Date(article.publishedAt).toLocaleDateString(
     "en-US",
@@ -58,3 +69,19 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
 };
 
 export default ArticleCard;
+
+/**
+ * Usage example:
+ *
+ * import ArticleCard from './ArticleCard';
+ *
+ * function ArticleListComponent({ articles }) {
+ * return (
+ * <div>
+ * {articles.map((article) => (
+ * <ArticleCard key={article.id} article={article} />
+ * ))}
+ * </div>
+ * );
+ * }
+ */

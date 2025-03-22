@@ -1,38 +1,22 @@
-import React, { useState } from "react";
-import { Footer, Header } from "./components/common";
-import { NewsFeed } from "./components/features";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import NewsFeedPage from "./pages/news-feed-page";
+import SearchResultPage from "./pages/search-result-page";
+import { ErrorBoundary } from "./components/common";
+import NotFoundPage from "./pages/not-found-page";
 
-const App: React.FC = () => {
-  const [source, setSource] = useState<"newsapi" | "guardian" | "nyt" | "all">(
-    "all"
-  );
-  const [category, setCategory] = useState("general");
-
-  const handleSourceChange = (
-    newSource: "newsapi" | "guardian" | "nyt" | "all"
-  ) => {
-    setSource(newSource);
-  };
-
-  const handleCategoryChange = (newCategory: string) => {
-    setCategory(newCategory);
-  };
-
+function App() {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      <Header
-        onSourceChange={handleSourceChange}
-        onCategoryChange={handleCategoryChange}
-        currentSource={source}
-        currentCategory={category}
-      />
-
-      <main className="flex-grow">
-        <NewsFeed source={source} category={category} />
-      </main>
-      <Footer />
-    </div>
+    <ErrorBoundary>
+      <Router>
+        <Routes>
+          <Route path="/search/:query" element={<SearchResultPage />} />
+          <Route path="/newsfeed" element={<NewsFeedPage />} />
+          <Route path="/" element={<NewsFeedPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Router>
+    </ErrorBoundary>
   );
-};
+}
 
 export default App;

@@ -67,7 +67,7 @@ export const useArticles = ({
         let newArticles: IArticle[] = [];
         let moreArticles = false;
 
-        const results = await Promise.all(
+        const results = await Promise.allSettled(
           initialSources.map((source) => {
             const fetcher = API_FETCHERS[source as keyof typeof API_FETCHERS];
             return fetcher
@@ -76,7 +76,15 @@ export const useArticles = ({
           })
         );
 
-        const validResults = results.filter((res) => res !== null);
+        const validResults = results
+          .map((result) => {
+            if (result.status === "fulfilled" && result.value !== null) {
+              return result.value;
+            }
+            return null;
+          })
+          .filter((res) => res !== null);
+
         newArticles = validResults.flatMap((res) => res!.articles);
         moreArticles = validResults.some((res) => res!.hasMore);
 
